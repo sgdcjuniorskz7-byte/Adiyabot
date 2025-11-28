@@ -1,11 +1,252 @@
 <!doctype html>
-<html>
-<head> 
-<meta charset="UTF-8"> 
-<title>Juniors.kz</title> 
-</head> 
-<body> 
-<h1>Welcome to Juniors.kz!</h1>
-<p>Your gateway to learning and growth.</p>
-</body> 
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Juniors.kz — Заявка</title>
+<style>
+  /* Учет безопасных отступов для iOS/Android webview */
+  :root {
+    --tg-blue: #2A9DF4;
+    --bg: #f7f9fb;
+    --card: #ffffff;
+    --muted: #7b8a99;
+    --input-border: #e6eef3;
+    --radius: 12px;
+  }
+  html,body {
+    height: 100%;
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background: var(--bg);
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .container {
+    max-width: 520px;
+    margin: 20px auto;
+    padding: 16px;
+  }
+
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 14px;
+    box-shadow: 0 1px 0 rgba(23,26,28,0.03), 0 8px 20px rgba(9,12,14,0.04);
+  }
+
+  .title {
+    font-size: 18px;
+    margin: 0 0 10px 0;
+    color: #13171a;
+  }
+
+  .desc {
+    margin: 0 0 12px 0;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  label {
+    display: block;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .input {
+    box-sizing: border-box;
+    width: 100%;
+    height: 44px;
+    padding: 8px 12px;
+    margin-bottom: 12px;
+    border: 1px solid var(--input-border);
+    border-radius: 10px;
+    background: #fff;
+    font-size: 15px;
+    color: #13171a;
+  }
+
+  .input::placeholder {
+    color: #aab7c3;
+  }
+
+  .hint {
+    font-size: 12px;
+    color: #97a5b3;
+    margin-bottom: 12px;
+  }
+
+  .tg-submit {
+    width: 100%;
+    display: inline-block;
+    padding: 12px 14px;
+    font-size: 15px;
+    border-radius: 12px;
+    border: none;
+    background: var(--tg-blue);
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.04);
+  }
+
+  .tg-submit[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  /* Fallback small footer */
+  .footer {
+    text-align: center;
+    margin-top: 10px;
+    color: #9aa6b3;
+    font-size: 12px;
+  }
+
+  @media (max-width: 420px) {
+    .container { padding: 8px; }
+    .card { padding: 12px; }
+    .input { height: 42px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+    <h1 class="title">Оставить заявку</h1>
+    <p class="desc">Заполните форму — данные будут отправлены боту Telegram.</p>
+
+    <form id="applicationForm" onsubmit="return false;">
+      <label for="firstName">Имя</label>
+      <input id="firstName" class="input" type="text" name="firstName" placeholder="Ваше имя" required>
+
+      <label for="lastName">Фамилия</label>
+      <input id="lastName" class="input" type="text" name="lastName" placeholder="Ваша фамилия" required>
+
+      <label for="email">E‑mail</label>
+      <input id="email" class="input" type="email" name="email" placeholder="example@mail.com" required>
+
+      <label for="phone">Телефон</label>
+      <input id="phone" class="input" type="tel" name="phone" placeholder="+7 (777) 123-45-67" inputmode="tel" required>
+
+      <p class="hint" id="errorMsg" style="display:none;color:#d74242;"></p>
+
+      <!-- Fallback button, visible outside Telegram WebApp -->
+      <button id="fallbackSend" class="tg-submit" type="button">Отправить заявку</button>
+    </form>
+
+    <div class="footer">Ваши данные будут использованы только для связи.</div>
+  </div>
+</div>
+
+<script>
+  // Инициализация Telegram WebApp
+  const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+
+  const firstName = document.getElementById('firstName');
+  const lastName = document.getElementById('lastName');
+  const email = document.getElementById('email');
+  const phone = document.getElementById('phone');
+  const form = document.getElementById('applicationForm');
+  const fallbackBtn = document.getElementById('fallbackSend');
+  const errorMsg = document.getElementById('errorMsg');
+
+  // Валидация базовая
+  function isValidEmail(e) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+  }
+  function isValidPhone(p) {
+    // Простая проверка: цифры и +, минимум 7 цифр
+    return /\+?\d{7,15}/.test(p.replace(/\s|[-()]/g, ""));
+  }
+
+  function gatherData() {
+    return {
+      firstName: firstName.value.trim(),
+      lastName: lastName.value.trim(),
+      email: email.value.trim(),
+      phone: phone.value.trim()
+    };
+  }
+
+  function validate() {
+    const data = gatherData();
+    if (!data.firstName || !data.lastName) {
+      errorMsg.textContent = "Пожалуйста, укажите имя и фамилию.";
+      errorMsg.style.display = "block";
+      return false;
+    }
+    if (!isValidEmail(data.email)) {
+      errorMsg.textContent = "Введите корректный e‑mail.";
+      errorMsg.style.display = "block";
+      return false;
+    }
+    if (!isValidPhone(data.phone)) {
+      errorMsg.textContent = "Введите корректный телефон.";
+      errorMsg.style.display = "block";
+      return false;
+    }
+    errorMsg.style.display = "none";
+    return true;
+  }
+
+  // Подключаем Telegram MainButton (если внутри web app)
+  if (tg) {
+    // Развернуть окно, если нужно
+    try { tg.expand(); } catch (e) {}
+
+    tg.MainButton.setText("Отправить заявку");
+    tg.MainButton.setParams({ color: "#2A9DF4", text_color: "#ffffff" });
+    tg.MainButton.show();
+    tg.MainButton.disable();
+
+    function onInputChange() {
+      tg.MainButton.setText("Отправить заявку");
+      if (validate()) {
+        tg.MainButton.enable();
+      } else {
+        tg.MainButton.disable();
+      }
+    }
+
+    // Включаем проверку на изменение полей
+    [firstName, lastName, email, phone].forEach(el => el.addEventListener('input', onInputChange));
+
+    // Обработка клика по главной кнопке Telegram
+    tg.MainButton.onClick(function() {
+      if (!validate()) return;
+      const payload = gatherData();
+      // Отправляем данные боту через Web App (будут доступны в web_app_data)
+      tg.sendData(JSON.stringify(payload));
+      // Можно закрыть web app
+      try { tg.close(); } catch(e) {}
+    });
+  } else {
+    // Fallback кнопка — отправляем данные на консоль или используем fetch на API
+    fallbackBtn.addEventListener('click', () => {
+      if (!validate()) return;
+      const payload = gatherData();
+      // Пример: в web-версии просто показываем JSON (или отправляем на сервер)
+      alert("Данные для отправки:\n" + JSON.stringify(payload, null, 2));
+      // Если нужно отправлять на сервер — раскомментируйте fetch с вашим endpoint
+      /*
+      fetch('/api/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }).then(r => r.json()).then(res => {
+        alert('Заявка отправлена');
+      }).catch(err => {
+        alert('Ошибка отправки');
+      });
+      */
+    });
+  }
+
+  // Удобство: сохранить фокус на первом поле
+  firstName.focus();
+</script>
+</body>
 </html>
