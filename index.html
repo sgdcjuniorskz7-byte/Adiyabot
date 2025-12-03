@@ -3,9 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Juniors.kz — Заявка</title>
+<title>Juniors.kz — Community</title>
 <style>
-  /* Учет безопасных отступов для iOS/Android webview */
   :root {
     --tg-blue: #2A9DF4;
     --bg: #f7f9fb;
@@ -14,7 +13,8 @@
     --input-border: #e6eef3;
     --radius: 12px;
   }
-  html,body {
+  
+  html, body {
     height: 100%;
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
@@ -29,23 +29,156 @@
     padding: 16px;
   }
 
-  .card {
+  /* === ГЛАВНАЯ СТРАНИЦА === */
+  #mainPage {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  .header {
+    text-align: center;
+    padding: 40px 16px 20px;
+  }
+
+  .logo {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--tg-blue);
+    margin: 0 0 10px 0;
+  }
+
+  .tagline {
+    font-size: 14px;
+    color: var(--muted);
+    margin: 0 0 30px 0;
+  }
+
+  .courses-grid {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 16px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .course-card {
     background: var(--card);
     border-radius: var(--radius);
-    padding: 14px;
+    padding: 16px;
     box-shadow: 0 1px 0 rgba(23,26,28,0.03), 0 8px 20px rgba(9,12,14,0.04);
+    text-align: center;
   }
 
-  .title {
-    font-size: 18px;
-    margin: 0 0 10px 0;
+  .course-icon {
+    font-size: 32px;
+    margin-bottom: 10px;
+  }
+
+  .course-name {
+    font-size: 14px;
+    font-weight: 600;
     color: #13171a;
+    margin: 0;
   }
 
-  .desc {
-    margin: 0 0 12px 0;
+  .course-desc {
+    font-size: 12px;
     color: var(--muted);
-    font-size: 13px;
+    margin: 6px 0 0 0;
+  }
+
+  .footer-action {
+    padding: 16px;
+    background: var(--card);
+    border-top: 1px solid var(--input-border);
+  }
+
+  .btn-register {
+    width: 100%;
+    padding: 14px;
+    font-size: 15px;
+    border-radius: 12px;
+    border: none;
+    background: var(--tg-blue);
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.04);
+  }
+
+  .btn-register:active {
+    opacity: 0.85;
+  }
+
+  /* === МОДАЛЬ РЕГИСТРАЦИЯ === */
+  #registrationModal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+
+  #registrationModal.show {
+    display: flex;
+  }
+
+  .modal-content {
+    background: var(--card);
+    border-radius: 16px 16px 0 0;
+    padding: 20px 16px 32px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease-out;
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .modal-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #13171a;
+    margin: 0;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--muted);
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
   }
 
   label {
@@ -53,6 +186,7 @@
     font-size: 13px;
     color: var(--muted);
     margin-bottom: 6px;
+    font-weight: 500;
   }
 
   .input {
@@ -60,7 +194,6 @@
     width: 100%;
     height: 44px;
     padding: 8px 12px;
-    margin-bottom: 12px;
     border: 1px solid var(--input-border);
     border-radius: 10px;
     background: #fff;
@@ -75,12 +208,22 @@
   .hint {
     font-size: 12px;
     color: #97a5b3;
-    margin-bottom: 12px;
+    margin-top: 6px;
   }
 
-  .tg-submit {
+  .error-msg {
+    font-size: 12px;
+    color: #d74242;
+    margin-top: 4px;
+    display: none;
+  }
+
+  .error-msg.show {
+    display: block;
+  }
+
+  .btn-submit {
     width: 100%;
-    display: inline-block;
     padding: 12px 14px;
     font-size: 15px;
     border-radius: 12px;
@@ -89,77 +232,176 @@
     color: #fff;
     font-weight: 600;
     cursor: pointer;
+    margin-top: 20px;
     box-shadow: 0 2px 0 rgba(0,0,0,0.04);
   }
 
-  .tg-submit[disabled] {
+  .btn-submit:disabled {
     opacity: 0.6;
     cursor: not-allowed;
   }
 
-  /* Fallback small footer */
-  .footer {
+  .privacy-text {
+    font-size: 11px;
+    color: #97a5b3;
+    margin-top: 12px;
     text-align: center;
-    margin-top: 10px;
-    color: #9aa6b3;
-    font-size: 12px;
   }
 
   @media (max-width: 420px) {
     .container { padding: 8px; }
-    .card { padding: 12px; }
-    .input { height: 42px; }
+    .courses-grid { gap: 10px; }
+    .header { padding: 30px 16px 15px; }
   }
 </style>
 </head>
 <body>
-<div class="container">
-  <div class="card">
-    <h1 class="title">Оставить заявку</h1>
-    <p class="desc">Заполните форму — данные будут отправлены боту Telegram.</p>
 
-    <form id="applicationForm" onsubmit="return false;">
-      <label for="firstName">Имя</label>
-      <input id="firstName" class="input" type="text" name="firstName" placeholder="Ваше имя" required>
+<!-- ГЛАВНАЯ СТРАНИЦА -->
+<div id="mainPage">
+  <div class="header">
+    <h1 class="logo">Juniors.kz</h1>
+    <p class="tagline">Community для студентов IT-направлений</p>
+  </div>
 
-      <label for="lastName">Фамилия</label>
-      <input id="lastName" class="input" type="text" name="lastName" placeholder="Ваша фамилия" required>
+  <div class="courses-grid">
+    <div class="course-card">
+      <div class="course-icon">💻</div>
+      <h3 class="course-name">Web Development</h3>
+      <p class="course-desc">Frontend & Backend</p>
+    </div>
+    <div class="course-card">
+      <div class="course-icon">📱</div>
+      <h3 class="course-name">Mobile Apps</h3>
+      <p class="course-desc">iOS & Android</p>
+    </div>
+    <div class="course-card">
+      <div class="course-icon">🤖</div>
+      <h3 class="course-name">AI & ML</h3>
+      <p class="course-desc">Machine Learning</p>
+    </div>
+    <div class="course-card">
+      <div class="course-icon">🎮</div>
+      <h3 class="course-name">Game Dev</h3>
+      <p class="course-desc">Unity & Unreal</p>
+    </div>
+    <div class="course-card">
+      <div class="course-icon">☁️</div>
+      <h3 class="course-name">Cloud & DevOps</h3>
+      <p class="course-desc">AWS, Docker</p>
+    </div>
+    <div class="course-card">
+      <div class="course-icon">🔒</div>
+      <h3 class="course-name">Cybersecurity</h3>
+      <p class="course-desc">Безопасность</p>
+    </div>
+  </div>
 
-      <label for="email">E‑mail</label>
-      <input id="email" class="input" type="email" name="email" placeholder="example@mail.com" required>
+  <div class="footer-action">
+    <button id="mainRegisterBtn" class="btn-register">Присоединиться</button>
+  </div>
+</div>
 
-      <label for="phone">Телефон</label>
-      <input id="phone" class="input" type="tel" name="phone" placeholder="+7 (777) 123-45-67" inputmode="tel" required>
+<!-- МОДАЛЬ РЕГИСТРАЦИИ -->
+<div id="registrationModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 class="modal-title">Регистрация</h2>
+      <button class="modal-close" id="closeModalBtn">✕</button>
+    </div>
 
-      <p class="hint" id="errorMsg" style="display:none;color:#d74242;"></p>
+    <form id="registrationForm" onsubmit="return false;">
+      <div class="form-group">
+        <label for="firstName">Имя *</label>
+        <input id="firstName" class="input" type="text" name="firstName" placeholder="Ваше имя" required>
+        <div class="error-msg" id="errorFirstName"></div>
+      </div>
 
-      <!-- Fallback button, visible outside Telegram WebApp -->
-      <button id="fallbackSend" class="tg-submit" type="button">Отправить заявку</button>
+      <div class="form-group">
+        <label for="lastName">Фамилия *</label>
+        <input id="lastName" class="input" type="text" name="lastName" placeholder="Ваша фамилия" required>
+        <div class="error-msg" id="errorLastName"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">E‑mail *</label>
+        <input id="email" class="input" type="email" name="email" placeholder="example@mail.com" required>
+        <div class="error-msg" id="errorEmail"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Телефон *</label>
+        <input id="phone" class="input" type="tel" name="phone" placeholder="+7 (777) 123-45-67" inputmode="tel" required>
+        <div class="hint">Формат: +7 (ХХХ) ХХХ-ХХ-ХХ</div>
+        <div class="error-msg" id="errorPhone"></div>
+      </div>
+
+      <button id="submitBtn" class="btn-submit" type="button">Зарегистрироваться</button>
+      <p class="privacy-text">Ваши данные будут использованы только для связи</p>
     </form>
-
-    <div class="footer">Ваши данные будут использованы только для связи.</div>
   </div>
 </div>
 
 <script>
-  // Инициализация Telegram WebApp
   const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+
+  // DOM элементы
+  const mainPage = document.getElementById('mainPage');
+  const registrationModal = document.getElementById('registrationModal');
+  const mainRegisterBtn = document.getElementById('mainRegisterBtn');
+  const closeModalBtn = document.getElementById('closeModalBtn');
+  const submitBtn = document.getElementById('submitBtn');
 
   const firstName = document.getElementById('firstName');
   const lastName = document.getElementById('lastName');
   const email = document.getElementById('email');
   const phone = document.getElementById('phone');
-  const form = document.getElementById('applicationForm');
-  const fallbackBtn = document.getElementById('fallbackSend');
-  const errorMsg = document.getElementById('errorMsg');
 
-  // Валидация базовая
+  // Валидация
   function isValidEmail(e) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
   }
+
   function isValidPhone(p) {
-    // Простая проверка: цифры и +, минимум 7 цифр
     return /\+?\d{7,15}/.test(p.replace(/\s|[-()]/g, ""));
+  }
+
+  function clearErrors() {
+    document.getElementById('errorFirstName').classList.remove('show');
+    document.getElementById('errorLastName').classList.remove('show');
+    document.getElementById('errorEmail').classList.remove('show');
+    document.getElementById('errorPhone').classList.remove('show');
+  }
+
+  function validate() {
+    clearErrors();
+    let isValid = true;
+
+    if (!firstName.value.trim()) {
+      document.getElementById('errorFirstName').textContent = "Укажите имя";
+      document.getElementById('errorFirstName').classList.add('show');
+      isValid = false;
+    }
+
+    if (!lastName.value.trim()) {
+      document.getElementById('errorLastName').textContent = "Укажите фамилию";
+      document.getElementById('errorLastName').classList.add('show');
+      isValid = false;
+    }
+
+    if (!isValidEmail(email.value.trim())) {
+      document.getElementById('errorEmail').textContent = "Некорректный e‑mail";
+      document.getElementById('errorEmail').classList.add('show');
+      isValid = false;
+    }
+
+    if (!isValidPhone(phone.value.trim())) {
+      document.getElementById('errorPhone').textContent = "Некорректный телефон";
+      document.getElementById('errorPhone').classList.add('show');
+      isValid = false;
+    }
+
+    return isValid;
   }
 
   function gatherData() {
@@ -171,81 +413,51 @@
     };
   }
 
-  function validate() {
-    const data = gatherData();
-    if (!data.firstName || !data.lastName) {
-      errorMsg.textContent = "Пожалуйста, укажите имя и фамилию.";
-      errorMsg.style.display = "block";
-      return false;
+  // Открыть модаль
+  mainRegisterBtn.addEventListener('click', () => {
+    mainPage.style.display = 'none';
+    registrationModal.classList.add('show');
+    firstName.focus();
+
+    if (tg) {
+      tg.MainButton.hide();
     }
-    if (!isValidEmail(data.email)) {
-      errorMsg.textContent = "Введите корректный e‑mail.";
-      errorMsg.style.display = "block";
-      return false;
+  });
+
+  // Закрыть модаль
+  closeModalBtn.addEventListener('click', () => {
+    registrationModal.classList.remove('show');
+    mainPage.style.display = 'flex';
+    clearErrors();
+    firstName.value = '';
+    lastName.value = '';
+    email.value = '';
+    phone.value = '';
+
+    if (tg) {
+      tg.MainButton.hide();
     }
-    if (!isValidPhone(data.phone)) {
-      errorMsg.textContent = "Введите корректный телефон.";
-      errorMsg.style.display = "block";
-      return false;
-    }
-    errorMsg.style.display = "none";
-    return true;
-  }
+  });
 
-  // Подключаем Telegram MainButton (если внутри web app)
-  if (tg) {
-    // Развернуть окно, если нужно
-    try { tg.expand(); } catch (e) {}
+  // Отправить
+  submitBtn.addEventListener('click', () => {
+    if (!validate()) return;
 
-    tg.MainButton.setText("Отправить заявку");
-    tg.MainButton.setParams({ color: "#2A9DF4", text_color: "#ffffff" });
-    tg.MainButton.show();
-    tg.MainButton.disable();
+    const payload = gatherData();
 
-    function onInputChange() {
-      tg.MainButton.setText("Отправить заявку");
-      if (validate()) {
-        tg.MainButton.enable();
-      } else {
-        tg.MainButton.disable();
-      }
-    }
-
-    // Включаем проверку на изменение полей
-    [firstName, lastName, email, phone].forEach(el => el.addEventListener('input', onInputChange));
-
-    // Обработка клика по главной кнопке Telegram
-    tg.MainButton.onClick(function() {
-      if (!validate()) return;
-      const payload = gatherData();
-      // Отправляем данные боту через Web App (будут доступны в web_app_data)
+    if (tg) {
       tg.sendData(JSON.stringify(payload));
-      // Можно закрыть web app
       try { tg.close(); } catch(e) {}
-    });
-  } else {
-    // Fallback кнопка — отправляем данные на консоль или используем fetch на API
-    fallbackBtn.addEventListener('click', () => {
-      if (!validate()) return;
-      const payload = gatherData();
-      // Пример: в web-версии просто показываем JSON (или отправляем на сервер)
-      alert("Данные для отправки:\n" + JSON.stringify(payload, null, 2));
-      // Если нужно отправлять на сервер — раскомментируйте fetch с вашим endpoint
-      /*
-      fetch('/api/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      }).then(r => r.json()).then(res => {
-        alert('Заявка отправлена');
-      }).catch(err => {
-        alert('Ошибка отправки');
-      });
-      */
-    });
+    } else {
+      alert("Данные:\n" + JSON.stringify(payload, null, 2));
+    }
+  });
+
+  // Инициализация Telegram
+  if (tg) {
+    try { tg.expand(); } catch (e) {}
   }
 
-  // Удобство: сохранить фокус на первом поле
   firstName.focus();
 </script>
 </body>
